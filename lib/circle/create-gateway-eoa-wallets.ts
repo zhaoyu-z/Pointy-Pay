@@ -76,6 +76,15 @@ export async function getOrCreateGatewayEOAWallet(
   try {
     return await getGatewayEOAWalletId(userId, blockchain);
   } catch {
+    // If a system-level private key executor is configured, use it instead of
+    // requiring a per-user Circle SCA wallet to exist.
+    const { hasPrivateKeyExecutor, getExecutorAddress, PRIVATE_KEY_EXECUTOR_ID } =
+      await import("@/lib/circle/private-key-executor");
+
+    if (hasPrivateKeyExecutor()) {
+      return { walletId: PRIVATE_KEY_EXECUTOR_ID, address: getExecutorAddress() };
+    }
+
     const supabase = await createClient();
     const { data: scaWallet, error } = await supabase
       .from("wallets")

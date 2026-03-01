@@ -55,7 +55,7 @@ export const CIRCLE_CHAIN_NAMES: Record<SupportedChain, string> = {
   arcTestnet: "ARC-TESTNET",
 };
 
-function getChainConfig(chain: SupportedChain): Chain {
+export function getChainConfig(chain: SupportedChain): Chain {
   switch (chain) {
     case "arcTestnet":
       return arcTestnet;
@@ -101,7 +101,7 @@ const gatewayWalletAbi = [
   },
 ] as const;
 
-const gatewayMinterAbi = [
+export const gatewayMinterAbi = [
   {
     type: "function",
     name: "gatewayMint",
@@ -146,7 +146,7 @@ function addressToBytes32(address: Address): `0x${string}` {
   return pad(address.toLowerCase() as Address, { size: 32 });
 }
 
-interface BurnIntentSpec {
+export interface BurnIntentSpec {
   version: number;
   sourceDomain: number;
   destinationDomain: number;
@@ -163,13 +163,13 @@ interface BurnIntentSpec {
   hookData: `0x${string}`;
 }
 
-interface BurnIntentData {
+export interface BurnIntentData {
   maxBlockHeight: bigint;
   maxFee: bigint;
   spec: BurnIntentSpec;
 }
 
-function burnIntentTypedData(burnIntent: BurnIntentData) {
+export function burnIntentTypedData(burnIntent: BurnIntentData) {
   return {
     types: { EIP712Domain, TransferSpec, BurnIntent },
     domain: { name: "GatewayWallet", version: "1" },
@@ -320,7 +320,7 @@ async function signBurnIntentWithEOA(
   return response.data.signature as `0x${string}`;
 }
 
-async function submitBurnIntent(
+export async function submitBurnIntent(
   burnIntent: BurnIntentData["spec"] & { maxBlockHeight: bigint; maxFee: bigint },
   signature: `0x${string}`
 ) {
@@ -355,6 +355,36 @@ async function submitBurnIntent(
     attestation: result.attestation as `0x${string}`,
     attestationSignature: result.signature as `0x${string}`,
     transferId: result.transferId as string,
+  };
+}
+
+export function buildBurnIntentData(
+  amount: bigint,
+  sourceChain: SupportedChain,
+  destChain: SupportedChain,
+  signerAddress: Address,
+  depositorAddress: Address,
+  recipientAddress: Address
+): BurnIntentData {
+  return {
+    maxBlockHeight: maxUint256,
+    maxFee: BigInt(2_010_000),
+    spec: {
+      version: 1,
+      sourceDomain: DOMAIN_IDS[sourceChain],
+      destinationDomain: DOMAIN_IDS[destChain],
+      sourceContract: GATEWAY_WALLET_ADDRESS as Address,
+      destinationContract: GATEWAY_MINTER_ADDRESS as Address,
+      sourceToken: USDC_ADDRESSES[sourceChain] as Address,
+      destinationToken: USDC_ADDRESSES[destChain] as Address,
+      sourceDepositor: depositorAddress,
+      destinationRecipient: recipientAddress,
+      sourceSigner: signerAddress,
+      destinationCaller: zeroAddress,
+      value: amount,
+      salt: `0x${randomBytes(32).toString("hex")}` as `0x${string}`,
+      hookData: "0x" as `0x${string}`,
+    },
   };
 }
 

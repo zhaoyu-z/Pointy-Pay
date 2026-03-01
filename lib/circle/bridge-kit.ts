@@ -1,4 +1,5 @@
 import type { SupportedChain } from "@/lib/circle/gateway-sdk";
+import { PRIVATE_KEY_EXECUTOR_ID, executeWithPrivateKey } from "@/lib/circle/private-key-executor";
 
 // Bridge Kit chain name mapping for Circle Wallets adapter
 const BRIDGE_KIT_CHAIN_NAMES: Record<SupportedChain, string> = {
@@ -13,6 +14,10 @@ const BRIDGE_KIT_CHAIN_NAMES: Record<SupportedChain, string> = {
  *
  * Bridge Kit abstracts the Gateway burn/mint process into a single call.
  * Used for campaign payout entries where destination != arcTestnet.
+ *
+ * When walletId is PRIVATE_KEY_EXECUTOR_ID, the system-level private key
+ * is used to sign burn intents and submit transactions directly via viem,
+ * bypassing the Circle Developer SDK entirely.
  */
 export async function executeBridgeKitTransfer(
   walletId: string,
@@ -21,6 +26,11 @@ export async function executeBridgeKitTransfer(
   amountUsdc: string,
   recipientAddress: string
 ): Promise<{ txHash: string }> {
+  // Use the system private key executor when no Circle-managed wallet is available
+  if (walletId === PRIVATE_KEY_EXECUTOR_ID) {
+    return executeWithPrivateKey(fromChain, toChain, amountUsdc, recipientAddress);
+  }
+
   let BridgeKit: any;
   let CircleWalletsAdapter: any;
 
