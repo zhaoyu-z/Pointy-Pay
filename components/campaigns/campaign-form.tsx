@@ -237,10 +237,31 @@ export function CampaignForm() {
         <Card>
           <CardHeader><CardTitle>Payout Policy</CardTitle></CardHeader>
           <CardContent className="space-y-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-text-primary">Require Approval</p>
-                <p className="text-xs text-text-muted">Campaign must be manually approved before execution</p>
+            <div
+              className="flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-300"
+              style={policyRequiresApproval ? {
+                background: "rgba(16, 185, 129, 0.07)",
+                border: "1px solid rgba(16, 185, 129, 0.25)",
+              } : {
+                background: "rgba(239, 68, 68, 0.06)",
+                border: "1px solid rgba(239, 68, 68, 0.22)",
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className="shrink-0 h-2.5 w-2.5 rounded-full transition-all duration-300"
+                  style={policyRequiresApproval ? {
+                    background: "#10b981",
+                    boxShadow: "0 0 8px rgba(16, 185, 129, 0.6)",
+                  } : {
+                    background: "#ef4444",
+                    boxShadow: "0 0 8px rgba(239, 68, 68, 0.5)",
+                  }}
+                />
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Require Approval</p>
+                  <p className="text-xs text-text-muted">Campaign must be manually approved before execution</p>
+                </div>
               </div>
               <Switch checked={policyRequiresApproval} onCheckedChange={setPolicyRequiresApproval} />
             </div>

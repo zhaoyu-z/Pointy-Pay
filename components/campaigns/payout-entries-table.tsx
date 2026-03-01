@@ -4,7 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import type { PayoutEntry } from "@/types/campaign";
-import { CHAIN_NAMES, getTxExplorerUrl } from "@/lib/chain-config";
+import { CHAIN_NAMES, getTxExplorerUrl, getAddressExplorerUrl } from "@/lib/chain-config";
 import type { SupportedChain } from "@/lib/chain-config";
 import { formatUsdc, truncateAddress } from "@/lib/utils";
 
@@ -34,7 +34,18 @@ export function PayoutEntriesTable({ entries }: PayoutEntriesTableProps) {
             <TableCell>
               <div>
                 <p className="font-medium text-text-primary">{entry.recipient_name}</p>
-                <p className="text-xs text-text-muted font-mono">{truncateAddress(entry.destination_address)}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <p className="text-xs text-text-muted font-mono">{truncateAddress(entry.destination_address)}</p>
+                  <a
+                    href={getAddressExplorerUrl(entry.destination_address, entry.destination_chain as SupportedChain)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-text-muted hover:text-primary transition-colors"
+                    title="View on explorer"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
               </div>
             </TableCell>
             <TableCell>

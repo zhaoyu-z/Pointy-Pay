@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecipientsTable } from "@/components/recipients/recipients-table";
 import { RecipientForm } from "@/components/recipients/recipient-form";
+import { EditRecipientDialog } from "@/components/recipients/edit-recipient-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Recipient } from "@/types/recipient";
 import { toast } from "sonner";
@@ -11,6 +12,8 @@ import { toast } from "sonner";
 export default function RecipientsPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingRecipient, setEditingRecipient] = useState<Recipient | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   const fetchRecipients = useCallback(async () => {
     try {
@@ -37,6 +40,15 @@ export default function RecipientsPage() {
     } catch (err: any) {
       toast.error("Failed to remove recipient", { description: err.message });
     }
+  };
+
+  const handleEdit = (recipient: Recipient) => {
+    setEditingRecipient(recipient);
+    setEditOpen(true);
+  };
+
+  const handleEditSuccess = (updated: Recipient) => {
+    setRecipients((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
   };
 
   return (
@@ -67,10 +79,21 @@ export default function RecipientsPage() {
               ))}
             </div>
           ) : (
-            <RecipientsTable recipients={recipients} onDelete={handleDelete} />
+            <RecipientsTable
+              recipients={recipients}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
+            />
           )}
         </CardContent>
       </Card>
+
+      <EditRecipientDialog
+        recipient={editingRecipient}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 }

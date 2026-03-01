@@ -1,20 +1,21 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Trash2, ExternalLink, Pencil } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Recipient } from "@/types/recipient";
-import { CHAIN_NAMES } from "@/lib/chain-config";
+import { CHAIN_NAMES, getAddressExplorerUrl } from "@/lib/chain-config";
 import type { SupportedChain } from "@/lib/chain-config";
 import { formatUsdc, truncateAddress } from "@/lib/utils";
 
 interface RecipientsTableProps {
   recipients: Recipient[];
   onDelete?: (id: string) => void;
+  onEdit?: (recipient: Recipient) => void;
 }
 
-export function RecipientsTable({ recipients, onDelete }: RecipientsTableProps) {
+export function RecipientsTable({ recipients, onDelete, onEdit }: RecipientsTableProps) {
   if (recipients.length === 0) {
     return (
       <p className="text-sm text-text-muted py-8 text-center">
@@ -44,9 +45,20 @@ export function RecipientsTable({ recipients, onDelete }: RecipientsTableProps) 
               </div>
             </TableCell>
             <TableCell>
-              <span className="font-mono text-xs text-text-muted">
-                {truncateAddress(r.wallet_address)}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-xs text-text-muted">
+                  {truncateAddress(r.wallet_address)}
+                </span>
+                <a
+                  href={getAddressExplorerUrl(r.wallet_address, r.preferred_chain as SupportedChain)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-muted hover:text-primary transition-colors"
+                  title="View on explorer"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             </TableCell>
             <TableCell>
               <Badge variant="outline" className="text-xs">
@@ -63,15 +75,28 @@ export function RecipientsTable({ recipients, onDelete }: RecipientsTableProps) 
               )}
             </TableCell>
             <TableCell className="text-right">
-              {onDelete && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(r.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-danger" />
-                </Button>
-              )}
+              <div className="flex items-center justify-end gap-1">
+                {onEdit && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(r)}
+                    title="Edit recipient"
+                  >
+                    <Pencil className="h-4 w-4 text-text-muted" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(r.id)}
+                    title="Delete recipient"
+                  >
+                    <Trash2 className="h-4 w-4 text-danger" />
+                  </Button>
+                )}
+              </div>
             </TableCell>
           </TableRow>
         ))}
