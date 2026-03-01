@@ -43,6 +43,7 @@ export function useUserWallets() {
     const data = await res.json();
     if (!res.ok) return { error: data.error ?? "Failed to add wallet" };
     await refresh();
+    window.dispatchEvent(new CustomEvent("wallet-linked"));
     return {};
   };
 

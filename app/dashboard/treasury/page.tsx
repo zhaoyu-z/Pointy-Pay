@@ -3,10 +3,14 @@
 import { useEffect, useState } from "react";
 import { BalanceCard } from "@/components/treasury/balance-card";
 import { TreasuryHealth } from "@/components/dashboard/treasury-health";
+import { ChainLiquidityChart } from "@/components/treasury/chain-liquidity-chart";
 
 export default function TreasuryPage() {
   const [gatewayBalance, setGatewayBalance] = useState(0);
   const [upcomingPayouts, setUpcomingPayouts] = useState(0);
+  const [arcBalance, setArcBalance] = useState(0);
+  const [baseBalance, setBaseBalance] = useState(0);
+  const [fujiBalance, setFujiBalance] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,6 +22,9 @@ export default function TreasuryPage() {
 
         if (balRes.status === "fulfilled") {
           setGatewayBalance(balRes.value.total ?? 0);
+          setArcBalance(balRes.value.arcTestnet ?? 0);
+          setBaseBalance(balRes.value.baseSepolia ?? 0);
+          setFujiBalance(balRes.value.avalancheFuji ?? 0);
         }
 
         if (campRes.status === "fulfilled") {
@@ -46,6 +53,12 @@ export default function TreasuryPage() {
         <BalanceCard />
         <TreasuryHealth gatewayBalance={gatewayBalance} upcomingPayouts={upcomingPayouts} />
       </div>
+
+      <ChainLiquidityChart
+        arcTestnet={arcBalance}
+        baseSepolia={baseBalance}
+        avalancheFuji={fujiBalance}
+      />
 
       {/* USYC link */}
       <div className="rounded-xl p-5 glass-card" style={{ borderColor: "rgba(129,140,248,0.2)" }}>
